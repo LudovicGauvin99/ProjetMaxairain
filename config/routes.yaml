@@ -1,0 +1,7 @@
+#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+# config/routes.yaml
+webcam_authentication:
+  path: /
+  controller: App\Controller\SecurityController::webcamAuthentication

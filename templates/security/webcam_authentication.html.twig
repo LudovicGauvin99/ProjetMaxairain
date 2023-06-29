@@ -1,0 +1,60 @@
+{# templates/security/webcam_authentication.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block javascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
+
+{% endblock %}
+
+{% block body %}
+    <div id="cameraContainer">
+        <div id="loadingIndicator"></div>
+
+        <div id="camera"></div>
+        <button id="captureButton">Capture</button>
+    </div>
+
+    <script>
+        Webcam.set({
+            width: 640,
+            height: 480,
+            dest_width: 640,
+            dest_height: 480,
+            image_format: 'jpeg',
+            jpeg_quality: 90
+        });
+
+        Webcam.attach('#camera');
+
+        document.getElementById('captureButton').addEventListener('click', function() {
+
+            Webcam.snap(function(dataUri) {
+                // Envoyez la photo capturée au serveur pour traitement
+                sendImageToServer(dataUri);
+            });
+        });
+
+        function sendImageToServer(imageData) {
+            // Effectuez une requête AJAX pour envoyer l'image capturée au serveur
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '{{ path('authenticate_user') }}', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    console.log(xhr)
+                    if (xhr.response == 200) {
+                        // L'authentification a réussi
+                        console.log('Utilisateur authentifié');
+                        window.location.href = '/dashboard'; // Redirection vers /dashboard
+
+                    } else {
+                        // L'authentification a échoué
+                        console.log('Utilisateur non reconnu');
+                    }
+                }
+            };
+            xhr.send('image=' + encodeURIComponent(imageData));
+        }
+
+    </script>
+{% endblock %}
